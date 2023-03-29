@@ -5,22 +5,36 @@ import Product from '../Product/Product';
 import './Shop.css'
 
 const Shop = () => {
-    const [products, setProducts]  = useState([]);
+    const [products, setProducts] = useState([]);
 
     const [cart, setCart] = useState([]);
 
-    useEffect(()=>{
+    useEffect(() => {
         fetch('products.json')
-        .then(res=>res.json())
-        .then(data=>setProducts(data))
+            .then(res => res.json())
+            .then(data => setProducts(data))
     }, []);
 
-    useEffect(()=>{
+    useEffect(() => {
         const storeCart = getShoppingCart();
-        console.log(storeCart);
-    }, []);
+        const savedCart = [];
+        // step :1 get id
+        for (const id in storeCart) {
+            // step: 2 get the product by using id
+            const addedProducts = products.find(product => product.id === id);
+            // step:3: get quantity of the product
+            if (addedProducts) {
+                const quantity = storeCart[id];
+                addedProducts.quantity = quantity;
+                // step:4: add the added prodct to save cart
+                savedCart.push(addedProducts);
+            }
+        }
+        // step:5: set the cart
+        setCart(savedCart);
+    }, [products]);
 
-    const AddToCart = (product) =>{
+    const AddToCart = (product) => {
         const newCart = [...cart, product];
         setCart(newCart);
         addToDb(product.id);
@@ -30,10 +44,10 @@ const Shop = () => {
         <div className='shop-container'>
             <div className='products-container'>
                 {
-                    products.map(product=><Product 
-                    key={product.id}
-                    product ={product}
-                    AddToCart = {AddToCart}
+                    products.map(product => <Product
+                        key={product.id}
+                        product={product}
+                        AddToCart={AddToCart}
                     ></Product>)
                 }
             </div>
